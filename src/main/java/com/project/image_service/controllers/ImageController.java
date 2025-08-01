@@ -1,12 +1,15 @@
 package com.project.image_service.controllers;
 
+import com.project.image_service.dtos.TransformationRequest;
 import com.project.image_service.models.Image;
 import com.project.image_service.models.User;
 import com.project.image_service.services.ImageService;
+import com.project.image_service.services.TransformationService;
 import com.project.image_service.services.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -22,6 +25,7 @@ import java.util.Map;
 public class ImageController {
     private final ImageService imageService;
     private final UserService userService;
+    private final TransformationService transformationService;
 
     @PostMapping
     public ResponseEntity<?> uploadImage(@RequestParam("file") MultipartFile file, @AuthenticationPrincipal UserDetails userDetails) throws Exception {
@@ -52,5 +56,16 @@ public class ImageController {
                 .header(HttpHeaders.CONTENT_TYPE, image.getContentType())
                 .body(resource);
     }
+
+    @PostMapping("/{id}/transform")
+    public ResponseEntity<?> transformImage(@PathVariable Long id, @RequestBody TransformationRequest request) {
+        try {
+            Image transformedImage = imageService.transformImage(id, request);
+            return ResponseEntity.ok(Map.of("url", "/images/" + transformedImage.getFilename()));
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Image processing failed");
+        }
+    }
+
 
 }
