@@ -1,7 +1,10 @@
 package com.project.image_service.controllers;
 
+import com.project.image_service.dtos.AuthResponse;
 import com.project.image_service.dtos.LoginRequest;
 import com.project.image_service.dtos.SignupRequest;
+import com.project.image_service.dtos.UserDTO;
+import com.project.image_service.models.User;
 import com.project.image_service.services.JwtService;
 import com.project.image_service.services.UserService;
 import lombok.RequiredArgsConstructor;
@@ -24,12 +27,14 @@ public class AuthController {
     private final AuthenticationManager authenticationManager;
 
     @PostMapping("/signup")
-    public ResponseEntity<String> signup(@RequestBody SignupRequest request){
+    public ResponseEntity<?> signup(@RequestBody SignupRequest request){
         if(userService.findByUsername(request.getUsername()).isPresent()){
             return ResponseEntity.badRequest().body("Username is already taken");
         }
-        userService.registerUser(request.getUsername(), request.getPassword());
-        return ResponseEntity.ok("User registered successfully");
+        var user = userService.registerUser(request.getUsername(), request.getPassword());
+        UserDTO userDTO = new UserDTO(user.getUsername());
+        var token = jwtService.generateToken(user.getUsername());
+        return ResponseEntity.ok(new AuthResponse(userDTO, token));
     }
 
     @PostMapping("login")
@@ -39,11 +44,11 @@ public class AuthController {
                     new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
             );
 
-            String jwt = jwtService.generateToken(request.getUsername());
-
-            return ResponseEntity.ok(Map.of("token", jwt));
+            String token = jwtService.generateToken(request.getUsername());
+            UserDTO user = new UserDTO(request.getUsername());
+            return ResponseEntity.ok(new AuthResponse(user, token));
         } catch (AuthenticationException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid usernarme or password");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid username or password");
         }
     }
 
