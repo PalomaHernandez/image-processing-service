@@ -19,6 +19,7 @@ public class Image {
     private String filename;
     private String originalFilename;
     private String contentType;
+    private String url;
     private long size;
     private Date uploadDate;
 
