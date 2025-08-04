@@ -1,12 +1,14 @@
 package com.project.image_service.controllers;
 
 import com.project.image_service.dtos.ImageResponse;
+import com.project.image_service.dtos.PaginatedImagesResponse;
 import com.project.image_service.dtos.TransformationRequest;
 import com.project.image_service.models.Image;
 import com.project.image_service.models.User;
 import com.project.image_service.services.ImageService;
 import com.project.image_service.services.UserService;
 import lombok.RequiredArgsConstructor;
+import org.apache.coyote.Response;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -35,6 +37,11 @@ public class ImageController {
     @GetMapping("/{id}")
     public ResponseEntity<ImageResponse> getImage(@PathVariable Long id) {
         return ResponseEntity.ok().body(imageService.getImageById(id));
+    }
+
+    @GetMapping
+    public ResponseEntity<PaginatedImagesResponse> getImagesPaginated(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int limit) {
+        return ResponseEntity.ok(imageService.getPaginatedImages(page, limit));
     }
 
     @PostMapping("/{id}/transform")

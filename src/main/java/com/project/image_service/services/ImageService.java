@@ -1,12 +1,17 @@
 package com.project.image_service.services;
 
 import com.project.image_service.dtos.ImageResponse;
+import com.project.image_service.dtos.PaginatedImagesResponse;
 import com.project.image_service.dtos.TransformationRequest;
 import com.project.image_service.models.Image;
 import com.project.image_service.models.User;
 import com.project.image_service.repositories.ImageRepository;
 import com.project.image_service.utils.FormatHelper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -17,6 +22,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -84,5 +90,19 @@ public class ImageService {
                 .build();
 
         return imageRepository.save(newImage);
+    }
+
+    public PaginatedImagesResponse getPaginatedImages(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("uploadDate").descending());
+        Page<Image> imagePage = imageRepository.findAll(pageable);
+
+        List<ImageResponse> imageResponses = imagePage.getContent().stream().map(ImageResponse::from).toList();
+
+        return new PaginatedImagesResponse(
+                imageResponses,
+                imagePage.getNumber(),
+                imagePage.getTotalPages(),
+                imagePage.getTotalElements()
+        );
     }
 }
