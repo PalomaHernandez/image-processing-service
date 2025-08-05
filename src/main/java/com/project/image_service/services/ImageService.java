@@ -3,6 +3,7 @@ package com.project.image_service.services;
 import com.project.image_service.dtos.ImageResponse;
 import com.project.image_service.dtos.PaginatedImagesResponse;
 import com.project.image_service.dtos.TransformationRequest;
+import com.project.image_service.exceptions.ImageNotFoundException;
 import com.project.image_service.models.Image;
 import com.project.image_service.models.User;
 import com.project.image_service.repositories.ImageRepository;
@@ -52,12 +53,12 @@ public class ImageService {
     }
 
     public ImageResponse getImageById(Long id) {
-        Image image = imageRepository.findById(id).orElseThrow(()-> new RuntimeException("Image not found"));
+        Image image = imageRepository.findById(id).orElseThrow(()-> new ImageNotFoundException("Image not found"));
         return ImageResponse.from(image);
     }
 
     public Image findById(Long id) {
-        return imageRepository.findById(id).orElseThrow(() -> new RuntimeException("Image not found"));
+        return imageRepository.findById(id).orElseThrow(() -> new ImageNotFoundException("Image not found"));
     }
 
     public Image transformImage(Long id, TransformationRequest request) throws IOException, URISyntaxException {

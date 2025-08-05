@@ -4,7 +4,6 @@ import com.project.image_service.dtos.AuthResponse;
 import com.project.image_service.dtos.LoginRequest;
 import com.project.image_service.dtos.SignupRequest;
 import com.project.image_service.dtos.UserDTO;
-import com.project.image_service.models.User;
 import com.project.image_service.services.JwtService;
 import com.project.image_service.services.UserService;
 import lombok.RequiredArgsConstructor;
@@ -15,8 +14,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.core.AuthenticationException;
-
-import java.util.Map;
 
 @RestController
 @RequestMapping("/auth")

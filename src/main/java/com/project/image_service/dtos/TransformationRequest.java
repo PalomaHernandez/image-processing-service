@@ -1,6 +1,7 @@
 package com.project.image_service.dtos;
 
 import lombok.Data;
+import lombok.NonNull;
 
 @Data
 public class TransformationRequest {

@@ -6,9 +6,9 @@ import com.project.image_service.dtos.TransformationRequest;
 import com.project.image_service.models.Image;
 import com.project.image_service.models.User;
 import com.project.image_service.services.ImageService;
+import com.project.image_service.services.RateLimitService;
 import com.project.image_service.services.UserService;
 import lombok.RequiredArgsConstructor;
-import org.apache.coyote.Response;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -25,6 +25,7 @@ import java.net.URISyntaxException;
 public class ImageController {
     private final ImageService imageService;
     private final UserService userService;
+    private final RateLimitService rateLimitService;
 
     @PostMapping
     public ImageResponse uploadImage(@RequestParam("file") MultipartFile file, @AuthenticationPrincipal UserDetails userDetails) throws Exception {
@@ -45,7 +46,11 @@ public class ImageController {
     }
 
     @PostMapping("/{id}/transform")
-    public ResponseEntity<?> transformImage(@PathVariable Long id, @RequestBody TransformationRequest request) {
+    public ResponseEntity<?> transformImage(@PathVariable Long id, @RequestBody TransformationRequest request, @AuthenticationPrincipal UserDetails userDetails) {
+        User user = userService.loadUserByUsername(userDetails.getUsername());
+        if(!rateLimitService.tryConsume(user.getId())) {
+            return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body("Rate limit exceeded");
+        }
         try {
             Image transformedImage = imageService.transformImage(id, request);
             ImageResponse response = ImageResponse.from(transformedImage);
